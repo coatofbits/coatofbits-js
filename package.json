@@ -1,0 +1,22 @@
+{
+  "name": "@coatofbits/generator-js",
+  "version": "1.0.0",
+  "description": "Javascript generator for Coat of Bits",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coatofbits/generator-js.git"
+  },
+  "keywords": [
+    "coatofbits"
+  ],
+  "author": "Jim McDonald <Jim.McDonald@wealdtech.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/coatofbits/generator-js/issues"
+  },
+  "homepage": "https://github.com/coatofbits/generator-js#readme"
+}
