@@ -22,10 +22,35 @@ module.exports = {
         svg += drawSvgShieldCharge(shield.charge)
         svg += `</g>`
         svg += `</g>`
+        svg += drawGloss()
         svg += `</g>`
         svg += `</svg>`
         return svg
     }
+}
+
+function drawGloss() {
+    var svg = ''
+
+    svg += `<g clip-path="url(#shieldc0)">`
+    const xGloss = Math.floor(Math.random()*30)
+    const yGloss = Math.floor(Math.random()*20)
+    svg += `<radialGradient id="shieldgloss1" cx="${xGloss}%" cy="${yGloss}%" r="50%" fx="${xGloss+10}%" fy="${yGloss+10}%">`
+    svg += `<stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>`
+    svg += `<stop offset="40%" stop-color="#ffffff" stop-opacity="0.20"/>`
+    svg += `<stop offset="60%" stop-color="#ffffff" stop-opacity="0.00"/>`
+    svg += `</radialGradient>`
+    svg += `<rect x="0" y="0" width="500" height="550" fill="url(#shieldgloss1)"/>`
+    svg += `<linearGradient id="shieldgloss2" x1="0%" y1="50%" x2="100%" y2="50%">`
+    svg += `<stop offset="0%" stop-color="#ffffff" stop-opacity="0.00"/>`
+    svg += `<stop offset="50%" stop-color="#ffffff" stop-opacity="0.10"/>`
+    svg += `<stop offset="60%" stop-color="#ffffff" stop-opacity="0.00"/>`
+    svg += `<stop offset="100%" stop-color="#000000" stop-opacity="0.10"/>`
+    svg += `</linearGradient>`
+    svg += `<rect x="0" y="0" width="500" height="550" fill="url(#shieldgloss2)"/>`
+    svg += `</g>`
+
+    return svg
 }
 
 // Draw an SVG shield
