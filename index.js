@@ -17,8 +17,10 @@ module.exports = {
         svg += drawSvgShieldDivisions(shield)
 
         svg += `<g clip-path="url(#shieldc0)">`
-        svg += `<g transform="${shieldInfo.chargetransform}">`
+        svg += `<g transform="${shieldInfo.chargetransform || ''}">`
+        svg += `<g transform="${shieldInfo.basetransform || ''}">`
         svg += drawSvgShieldCharge(shield.charge)
+        svg += `</g>`
         svg += `</g>`
         svg += `</g>`
         svg += `</svg>`
@@ -55,15 +57,14 @@ function drawSvgShieldDivisions(shield) {
     var svg = ''
 
     const divisionInfo = divisions.find(d => d.id == shield.divisionStyle.id)
+    const shieldInfo = shields.find(s => s.id == shield.style.id)
     for (var i = 0; i < divisionInfo.svg.length; i++) {
         // Constrain drawing by both the overall shield path and the path of
         // this particular division
         svg += `<g clip-path="url(#shieldc0)">`
-        //svg += `<g transform="${shields[info.style.id].basetransform}">`
         svg += `<g clip-path="url(#shieldc${i+1})">`
         svg += drawSvgShieldDivision(shield, i)
         svg += `</g>`
-        //svg += `</g>`
         svg += `</g>`
     }
 
@@ -72,7 +73,7 @@ function drawSvgShieldDivisions(shield) {
 
 const shieldWidth = 500
 const shieldHeight = 550
-const bgWidth = 4400
+const bgWidth = 4000
 const bgHeight = 4400
 const chargeWidth = 500
 const chargeHeight = 500
@@ -80,40 +81,41 @@ const chargeHeight = 500
 function drawSvgShieldDivision(shield, divisionId) {
     var svg = ''
 
+    const shieldInfo = shields.find(s => s.id == shield.style.id)
     const division = shield.divisions[divisionId]
+    const divisionsInfo = divisions.find(d => d.id == shield.divisionStyle.id)
 
     // Draw the background.  The background needs to be scaled and centered
     // accordingly depending on the shield and the division styles
 
-    // Flood the background with the primary colour
+    // Paint the background with the primary colour
     svg += `<g stroke="none" fill="${colourRgb(division.background.primaryColour.id)}">`
-    svg += divisions.find(d => d.id == shield.divisionStyle.id).svg[divisionId].element
+    svg += divisionsInfo.svg[divisionId].element
     svg += `</g>`
 
-
-    // Backgrounds are natively 4400x4400.  Scale and translate accordingly
-    // Scaling due to number of divisions
-    const shieldInfo = shields.find(s => s.id == shield.style.id)
-    const divisionsInfo = shieldInfo.divisions[shield.divisionStyle.id]
-    const numDivisions = divisionsInfo.length
-    const divisionInfo = divisionsInfo[divisionId]
-    // Offsets for this division
-    const bgXOffset = (bgWidth / (numDivisions * 2)) - (shieldWidth / 2) + (shieldWidth / 2 - divisionInfo.x)
-    const bgYOffset = (bgHeight / (numDivisions * 2)) - (shieldHeight / 2) + (shieldHeight / 2 - divisionInfo.y)
-
-    svg += `<g transform="matrix(${1/numDivisions},0,0,${1/numDivisions},-${bgXOffset},-${bgYOffset})">`
-    svg += `<g stroke-width="100px" stroke="${colourRgb(division.background.secondaryColour.id)}" fill="none">`
-    svg += backgrounds.find(b => b.id == division.background.style.id).svg
-    svg += `</g>`
-    svg += `</g>`
+    // Backgrounds are natively 4000x4400.  Scale and translate accordingly
+    const numDivisions = divisionsInfo.segments.length
+    const divisionInfo = divisionsInfo.segments[divisionId]
+    const bgXOffset = (bgWidth / (numDivisions * 2)) - divisionInfo.x
+    const bgYOffset = (bgHeight / (numDivisions * 2)) - divisionInfo.y
 
     // Charges are natively 500x500.  Scale and translate accordingly
     const chargeScale = divisionInfo.scale || (1 / numDivisions)
     const chargeXOffset = (chargeWidth - chargeWidth * chargeScale) / 2 + divisionInfo.x - chargeWidth / 2
     const chargeYOffset = (chargeHeight - chargeHeight * chargeScale) / 2 + divisionInfo.y - chargeHeight / 2
+
+    // Base transform, then background, then charge
+    svg += `<g transform="${shieldInfo.basetransform || ''}">`
+    svg += `<g transform="matrix(${1/numDivisions},0,0,${1/numDivisions},-${bgXOffset},-${bgYOffset})">`
+    svg += `<g stroke-width="100px" stroke="${colourRgb(division.background.secondaryColour.id)}" fill="none">`
+    svg += backgrounds.find(b => b.id == division.background.style.id).svg
+    svg += `</g>`
+    svg += `</g>`
     svg += `<g transform="matrix(${chargeScale},0,0,${chargeScale},${chargeXOffset},${chargeYOffset})">`
     svg += drawSvgShieldCharge(division.charge)
     svg += `</g>`
+    svg += `</g>`
+
     return svg
 }
 
