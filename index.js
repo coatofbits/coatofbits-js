@@ -17,8 +17,8 @@ module.exports = {
         svg += drawSvgShieldDivisions(shield)
 
         svg += `<g clip-path="url(#shieldc0)">`
-        svg += `<g transform="${shieldInfo.chargetransform || ''}">`
         svg += `<g transform="${shieldInfo.basetransform || ''}">`
+        svg += `<g transform="${shieldInfo.chargetransform || ''}">`
         svg += drawSvgShieldCharge(shield.charge)
         svg += `</g>`
         svg += `</g>`
@@ -129,7 +129,7 @@ function drawSvgShieldDivision(shield, divisionId) {
     const chargeXOffset = (chargeWidth - chargeWidth * chargeScale) / 2 + divisionInfo.x - chargeWidth / 2
     const chargeYOffset = (chargeHeight - chargeHeight * chargeScale) / 2 + divisionInfo.y - chargeHeight / 2
 
-    // Base transform, then background, then charge
+    // Background then charge
     svg += `<g transform="${shieldInfo.basetransform || ''}">`
     svg += `<g transform="matrix(${1/numDivisions},0,0,${1/numDivisions},-${bgXOffset},-${bgYOffset})">`
     svg += `<g stroke-width="100px" stroke="${colourRgb(division.background.secondaryColour.id)}" fill="none">`
