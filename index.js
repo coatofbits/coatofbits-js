@@ -58,7 +58,7 @@ function drawSvgShield(shield) {
     const shieldInfo = shields.find(s => s.id == shield.style.id)
 
     // Draw the shield itself.
-    var svg = `<g stroke="#000000" stroke-width="4px" fill="none">`
+    var svg = `<g stroke="#000000" stroke-width="4px" fill="ffffff">`
     svg += shieldInfo.outline
     svg += `</g>`
 
