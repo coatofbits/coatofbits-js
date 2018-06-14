@@ -9,7 +9,6 @@ const layouts = require('@coatofbits/data/layouts.json').layouts
 // The result is an SVG element with dimensions 500x550
 module.exports = {
     generateSvgShield: function(shield) {
-
         const shieldInfo = shields.find(s => s.id == shield.style.id)
 
         var svg = `<svg width="500" height="550" viewbox="0 0 500 550" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`
@@ -19,11 +18,17 @@ module.exports = {
         svg += `<g clip-path="url(#shieldc0)">`
         svg += `<g transform="${shieldInfo.basetransform || ''}">`
         svg += `<g transform="${shieldInfo.chargetransform || ''}">`
+        if (shouldApplyTransform(shield.charge.transform)) {
+            svg += applyTransform(shield.charge.transform, chargeWidth, chargeHeight)
+        }
         svg += drawSvgShieldCharge(shield.charge)
+        if (shouldApplyTransform(shield.charge.transform)) {
+            svg += `</g>`
+        }
+        svg += `</g>`
         svg += `</g>`
         svg += `</g>`
         svg += drawGloss()
-        svg += `</g>`
         svg += `</svg>`
         return svg
     }
@@ -58,7 +63,7 @@ function drawSvgShield(shield) {
     const shieldInfo = shields.find(s => s.id == shield.style.id)
 
     // Draw the shield itself.
-    var svg = `<g stroke="#000000" stroke-width="4px" fill="ffffff">`
+    var svg = `<g stroke="#000000" stroke-width="4px" fill="#ffffff">`
     svg += shieldInfo.outline
     svg += `</g>`
 
@@ -109,6 +114,7 @@ function drawSvgShieldDivision(shield, divisionId) {
     const shieldInfo = shields.find(s => s.id == shield.style.id)
     const division = shield.divisions[divisionId]
     const divisionsInfo = divisions.find(d => d.id == shield.divisionStyle.id)
+    const backgroundInfo = backgrounds.find(b => b.id == division.background.style.id)
 
     // Draw the background.  The background needs to be scaled and centered
     // accordingly depending on the shield and the division styles
@@ -121,8 +127,8 @@ function drawSvgShieldDivision(shield, divisionId) {
     // Backgrounds are natively 4000x4400.  Scale and translate accordingly
     const numDivisions = divisionsInfo.segments.length
     const divisionInfo = divisionsInfo.segments[divisionId]
-    const bgXOffset = (bgWidth / (numDivisions * 2)) - divisionInfo.x
-    const bgYOffset = (bgHeight / (numDivisions * 2)) - divisionInfo.y
+    const bgXOffset = ((bgWidth / (numDivisions * 2)) - divisionInfo.x) * -1
+    const bgYOffset = ((bgHeight / (numDivisions * 2)) - divisionInfo.y) * -1
 
     // Charges are natively 500x500.  Scale and translate accordingly
     const chargeScale = divisionInfo.scale || (1 / numDivisions)
@@ -131,17 +137,29 @@ function drawSvgShieldDivision(shield, divisionId) {
 
     // Background then charge
     svg += `<g transform="${shieldInfo.basetransform || ''}">`
-    svg += `<g transform="matrix(${1/numDivisions},0,0,${1/numDivisions},-${bgXOffset},-${bgYOffset})">`
-    svg += `<g stroke-width="100px" stroke="${colourRgb(division.background.secondaryColour.id)}" fill="none">`
-    svg += backgrounds.find(b => b.id == division.background.style.id).svg
-    svg += `</g>`
-    svg += `</g>`
-    svg += `<g transform="matrix(${chargeScale},0,0,${chargeScale},${chargeXOffset},${chargeYOffset})">`
+    if (backgroundInfo && backgroundInfo.svg) {
+        svg += `<g transform="matrix(${xx(1/numDivisions)},0,0,${xx(1/numDivisions)},${xx(bgXOffset)},${xx(bgYOffset)})">`
+        svg += `<g stroke-width="100px" stroke="${colourRgb(division.background.secondaryColour.id)}" fill="none">`
+        svg += backgroundInfo.svg
+        svg += `</g>`
+        svg += `</g>`
+    }
+    if (shouldApplyTransform(division.charge.transform)) {
+        svg += applyTransform(division.charge.transform, chargeWidth, chargeHeight)
+    }
+    svg += `<g transform="matrix(${xx(chargeScale)},0,0,${xx(chargeScale)},${xx(chargeXOffset)},${xx(chargeYOffset)})">`
     svg += drawSvgShieldCharge(division.charge)
     svg += `</g>`
+    if (shouldApplyTransform(division.charge.transform)) {
+      svg += `</g>`
+    }
     svg += `</g>`
 
     return svg
+}
+
+function xx(val) {
+    return Number(Number(val).toFixed(2))
 }
 
 function drawSvgShieldCharge(charge) {
@@ -154,7 +172,20 @@ function drawSvgShieldCharge(charge) {
         for (var i = 0; i < layoutInfo.transforms.length; i++) {
             svg += `<g transform="${layoutInfo.transforms[i]}">`
             for (var j = 0; j < chargeInfo.svg.length; j++) {
-                svg += chargeInfo.svg[j].element
+                switch (chargeInfo.svg[j].fill) {
+                    case 'outline':
+                        svg += chargeInfo.svg[j].element.replace('/>', ` fill="${colourRgb(charge.outlineColour.id)}"/>`)
+                        break
+                    case 'primary':
+                        svg += chargeInfo.svg[j].element.replace('/>', ` fill="${colourRgb(charge.primaryColour.id)}"/>`)
+                        break
+                    case 'secondary':
+                        svg += chargeInfo.svg[j].element.replace('/>', ` fill="${colourRgb(charge.secondaryColour.id)}"/>`)
+                        break
+                    default:
+                        svg += chargeInfo.svg[j].element
+                        break
+                }
             }
             svg += `</g>`
         }
@@ -169,3 +200,24 @@ function colourRgb(id) {
     return colourInfo.value || 'none'
 }
 
+function shouldApplyTransform(transform) {
+    return (transform.scale != 1 || transform.translateX || transform.translateY || transform.rotate)
+}
+
+function applyTransform(transform, width, height) {
+    svg = `<g transform="`
+    if (transform.translateX != 0 || transform.translateY != 0) {
+        svg += `translate(${xx(transform.translateX)},${xx(transform.translateY)}) `
+    }
+    if (transform.rotate != 0) {
+        svg += `rotate(${xx(transform.rotateX)},${xx(width/2)},${xx(height/2)}) `
+    }
+    if (transform.scale != 1) {
+        // Need to fix the location before scaling as scaling happens from the origin
+        fixX = (-width/2)*(transform.scale - 1)
+        fixY = (-height/2)*(transform.scale - 1)
+        svg += `translate(${xx(fixX)},${xx(fixY)}) scale(${xx(transform.scale)}) `
+    }
+    svg += `">`
+    return svg
+}
