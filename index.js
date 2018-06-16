@@ -201,16 +201,16 @@ function colourRgb(id) {
 }
 
 function shouldApplyTransform(transform) {
-    return (transform.scale != 1 || transform.translateX || transform.translateY || transform.rotate)
+    return (transform.scale != 1 || transform.translationX || transform.translationY || transform.rotation)
 }
 
 function applyTransform(transform, width, height) {
     svg = `<g transform="`
-    if (transform.translateX != 0 || transform.translateY != 0) {
-        svg += `translate(${xx(transform.translateX)},${xx(transform.translateY)}) `
+    if (transform.translationX != 0 || transform.translationY != 0) {
+        svg += `translate(${xx(transform.translationX)},${xx(transform.translationY)}) `
     }
-    if (transform.rotate != 0) {
-        svg += `rotate(${xx(transform.rotateX)},${xx(width/2)},${xx(height/2)}) `
+    if (transform.rotation != 0) {
+        svg += `rotate(${xx(transform.rotation)},${xx(width/2)},${xx(height/2)}) `
     }
     if (transform.scale != 1) {
         // Need to fix the location before scaling as scaling happens from the origin
