@@ -5,13 +5,20 @@ const backgrounds = require('@coatofbits/data/backgrounds.json').backgrounds
 const charges = require('@coatofbits/data/charges.json').charges
 const layouts = require('@coatofbits/data/layouts.json').layouts
 
+const shieldWidth = 500
+const shieldHeight = 550
+const bgWidth = 4000
+const bgHeight = 4400
+const chargeWidth = 500
+const chargeHeight = 500
+
 // generateSvgShield generates an SVG version of the shield given shield information.
 // The result is an SVG element with dimensions 500x550
 module.exports = {
     generateSvgShield: function(shield) {
         const shieldInfo = shields.find(s => s.id == shield.style.id)
 
-        var svg = `<svg width="500" height="550" viewbox="0 0 500 550" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`
+        var svg = `<svg width="${shieldWidth}" height="${shieldHeight}" viewbox="0 0 ${shieldWidth} ${shieldHeight}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`
         svg += drawSvgShield(shield)
         svg += drawSvgShieldDivisions(shield)
 
@@ -19,7 +26,7 @@ module.exports = {
         svg += `<g transform="${shieldInfo.basetransform || ''}">`
         svg += `<g transform="${shieldInfo.chargetransform || ''}">`
         if (shouldApplyTransform(shield.charge.transform)) {
-            svg += applyTransform(shield.charge.transform, chargeWidth, chargeHeight)
+            svg += applyTransform(shield.charge.transform, shieldWidth, shieldHeight)
         }
         svg += drawSvgShieldCharge(shield.charge)
         if (shouldApplyTransform(shield.charge.transform)) {
@@ -45,14 +52,14 @@ function drawGloss() {
     svg += `<stop offset="40%" stop-color="#ffffff" stop-opacity="0.20"/>`
     svg += `<stop offset="60%" stop-color="#ffffff" stop-opacity="0.00"/>`
     svg += `</radialGradient>`
-    svg += `<rect x="0" y="0" width="500" height="550" fill="url(#shieldgloss1)"/>`
+    svg += `<rect x="0" y="0" width="${shieldWidth}" height="${shieldHeight}" fill="url(#shieldgloss1)"/>`
     svg += `<linearGradient id="shieldgloss2" x1="0%" y1="50%" x2="100%" y2="50%">`
     svg += `<stop offset="0%" stop-color="#ffffff" stop-opacity="0.00"/>`
     svg += `<stop offset="50%" stop-color="#ffffff" stop-opacity="0.10"/>`
     svg += `<stop offset="60%" stop-color="#ffffff" stop-opacity="0.00"/>`
     svg += `<stop offset="100%" stop-color="#000000" stop-opacity="0.10"/>`
     svg += `</linearGradient>`
-    svg += `<rect x="0" y="0" width="500" height="550" fill="url(#shieldgloss2)"/>`
+    svg += `<rect x="0" y="0" width="${shieldWidth}" height="${shieldHeight}" fill="url(#shieldgloss2)"/>`
     svg += `</g>`
 
     return svg
@@ -101,13 +108,6 @@ function drawSvgShieldDivisions(shield) {
     return svg
 }
 
-const shieldWidth = 500
-const shieldHeight = 550
-const bgWidth = 4000
-const bgHeight = 4400
-const chargeWidth = 500
-const chargeHeight = 500
-
 function drawSvgShieldDivision(shield, divisionId) {
     var svg = ''
 
@@ -145,7 +145,7 @@ function drawSvgShieldDivision(shield, divisionId) {
         svg += `</g>`
     }
     if (shouldApplyTransform(division.charge.transform)) {
-        svg += applyTransform(division.charge.transform, chargeWidth, chargeHeight)
+        svg += applyTransform(division.charge.transform, shieldWidth, shieldHeight)
     }
     svg += `<g transform="matrix(${xx(chargeScale)},0,0,${xx(chargeScale)},${xx(chargeXOffset)},${xx(chargeYOffset)})">`
     svg += drawSvgShieldCharge(division.charge)
@@ -209,14 +209,14 @@ function applyTransform(transform, width, height) {
     if (transform.translationX != 0 || transform.translationY != 0) {
         svg += `translate(${xx(transform.translationX)},${xx(transform.translationY)}) `
     }
-    if (transform.rotation != 0) {
-        svg += `rotate(${xx(transform.rotation)},${xx(width/2)},${xx(height/2)}) `
-    }
     if (transform.scale != 1) {
         // Need to fix the location before scaling as scaling happens from the origin
         fixX = (-width/2)*(transform.scale - 1)
         fixY = (-height/2)*(transform.scale - 1)
-        svg += `translate(${xx(fixX)},${xx(fixY)}) scale(${xx(transform.scale)}) `
+        svg += `translate(${xx(fixX)},${xx(fixY)}) scale(${xx(transform.scale)}) translate(${xx(fixX*-1)},${xx(fixY*-1)}) `
+    }
+    if (transform.rotation != 0) {
+        svg += `rotate(${xx(transform.rotation)},${xx(width/2)},${xx(height/2)}) `
     }
     svg += `">`
     return svg
