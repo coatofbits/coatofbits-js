@@ -26,7 +26,7 @@ module.exports = {
         svg += `<g transform="${shieldInfo.basetransform || ''}">`
         svg += `<g transform="${shieldInfo.chargetransform || ''}">`
         if (shouldApplyTransform(shield.charge.transform)) {
-            svg += applyTransform(shield.charge.transform, shieldWidth, shieldHeight)
+            svg += applyTransform(shield.charge.transform, chargeWidth, chargeHeight)
         }
         svg += drawSvgShieldCharge(shield.charge)
         if (shouldApplyTransform(shield.charge.transform)) {
@@ -144,15 +144,15 @@ function drawSvgShieldDivision(shield, divisionId) {
         svg += `</g>`
         svg += `</g>`
     }
-    if (shouldApplyTransform(division.charge.transform)) {
-        svg += applyTransform(division.charge.transform, shieldWidth, shieldHeight)
-    }
     svg += `<g transform="matrix(${xx(chargeScale)},0,0,${xx(chargeScale)},${xx(chargeXOffset)},${xx(chargeYOffset)})">`
+    if (shouldApplyTransform(division.charge.transform)) {
+        svg += applyTransform(division.charge.transform, chargeWidth, chargeHeight)
+    }
     svg += drawSvgShieldCharge(division.charge)
-    svg += `</g>`
     if (shouldApplyTransform(division.charge.transform)) {
       svg += `</g>`
     }
+    svg += `</g>`
     svg += `</g>`
 
     return svg
