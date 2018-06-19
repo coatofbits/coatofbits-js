@@ -210,10 +210,7 @@ function applyTransform(transform, width, height) {
         svg += `translate(${xx(transform.translationX)},${xx(transform.translationY)}) `
     }
     if (transform.scale != 1) {
-        // Need to fix the location before scaling as scaling happens from the origin
-        fixX = (-width/2)*(transform.scale - 1)
-        fixY = (-height/2)*(transform.scale - 1)
-        svg += `translate(${xx(fixX)},${xx(fixY)}) scale(${xx(transform.scale)}) translate(${xx(fixX*-1)},${xx(fixY*-1)}) `
+        svg += `translate(${xx(width/2)},${xx(height/2)}) scale(${xx(transform.scale)}) translate(${xx(-width/2)},${xx(-height/2)}) `
     }
     if (transform.rotation != 0) {
         svg += `rotate(${xx(transform.rotation)},${xx(width/2)},${xx(height/2)}) `
